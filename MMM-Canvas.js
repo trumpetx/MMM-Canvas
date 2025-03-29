@@ -8,32 +8,32 @@ Module.register("MMM-Canvas", {
 
     // Module config defaults.
     defaults: {
-		accessKey: "", //Access key
-    updateInterval: 60 * 60 * 1000, //One hour
-    colors: ["blue",],
-    courses: ["28733",],
-    urlbase: "dummyurl.edu",
-    assignMaxLen: 35,
-    assignToDisplay: 12,
+        accessKey: "", //Access key
+        updateInterval: 60 * 60 * 1000, //One hour
+        colors: ["blue",],
+        courses: ["28733",],
+        urlbase: "dummyurl.edu",
+        assignMaxLen: 35,
+        assignToDisplay: 12,
     },
 
-    getStyles: function() {
+    getStyles: function () {
         return ["canvas.css"];
     },
 
-    getScripts: function() {
+    getScripts: function () {
         return ["moment.js"];
     },
 
 
-	start: function() {
+    start: function () {
         Log.info("Starting module: " + this.name);
         this.CANVAS = {};
         this.scheduleUpdate();
     },
 
 
-    getDom: function() {
+    getDom: function () {
         var wrapper = document.createElement("div");
         wrapper.className = "wrapper";
         //wrapper.style.maxWidth = this.config.maxWidth;
@@ -50,7 +50,7 @@ Module.register("MMM-Canvas", {
         top.classList.add("list-row");
 
         // create table
-         var Table = document.createElement("table");
+        var Table = document.createElement("table");
 
         // create row and column for Currency
         var Row = document.createElement("tr");
@@ -67,33 +67,33 @@ Module.register("MMM-Canvas", {
 
 
         Table.appendChild(Row);
-    CANVAS[1].sort((a,b) => new moment(a[1]) - new moment(b[1]));
-      var assignToDisplay = this.config.assignToDisplay + 1
-		for (var i in CANVAS[1].slice(0, assignToDisplay)) {
+        CANVAS[1].sort((a, b) => new moment(a[1]) - new moment(b[1]));
+        var assignToDisplay = this.config.assignToDisplay + 1
+        for (var i in CANVAS[1].slice(0, assignToDisplay)) {
 
-	//// Learned this on jsfiddle. HOORAY!
-	//// This dynamically creates the div/tags for each element of CANVAS.quotes
-        var Row = document.createElement("tr");
-        var newElement = document.createElement("td");
-        var newElement1 = document.createElement("td");
-        newElement.classList.add("align-left", "small");
-        newElement1.classList.add("align-right", "small");
-        if (CANVAS[1][i][0] != "") {
-          newElement.innerHTML = CANVAS[1][i][0].slice(0, this.config.assignMaxLen);
-          var m = moment(CANVAS[1][i][1]);
-          //newElement1.innerHTML = m.format("M/D h:mm A");
-          //newElement1.innerHTML = m.format("M/D h:mm A");
-          newElement1.innerHTML = CANVAS[1][i][2];
-          newElement1.style.color = this.config.colors[CANVAS[1][i][2]];
-          newElement.style.color = this.config.colors[CANVAS[1][i][2]];
-        }
+            //// Learned this on jsfiddle. HOORAY!
+            //// This dynamically creates the div/tags for each element of CANVAS.quotes
+            var Row = document.createElement("tr");
+            var newElement = document.createElement("td");
+            var newElement1 = document.createElement("td");
+            newElement.classList.add("align-left", "small");
+            newElement1.classList.add("align-right", "small");
+            if (CANVAS[1][i][0] != "") {
+                newElement.innerHTML = CANVAS[1][i][0].slice(0, this.config.assignMaxLen);
+                var m = moment(CANVAS[1][i][1]);
+                //newElement1.innerHTML = m.format("M/D h:mm A");
+                //newElement1.innerHTML = m.format("M/D h:mm A");
+                newElement1.innerHTML = CANVAS[1][i][2];
+                newElement1.style.color = this.config.colors[CANVAS[1][i][2]];
+                newElement.style.color = this.config.colors[CANVAS[1][i][2]];
+            }
 
 
-		Row.appendChild(newElement);
-    Row.appendChild(newElement1);
-    Table.appendChild(Row);
+            Row.appendChild(newElement);
+            Row.appendChild(newElement1);
+            Table.appendChild(Row);
 
-	} // <-- closes key/pair loop
+        } // <-- closes key/pair loop
         wrapper.appendChild(Table);
         var timestamp = document.createElement("div");
         timestamp.classList.add("small", "bright", "timestamp");
@@ -101,41 +101,41 @@ Module.register("MMM-Canvas", {
         timestamp.style.fontSize = "x-small";
         wrapper.appendChild(timestamp);
         return wrapper;
-}, // closes getDom
+    }, // closes getDom
 
 
 
 
     /////  Add this function to the modules you want to control with voice //////
 
-    notificationReceived: function(notification, payload) {
+    notificationReceived: function (notification, payload) {
         if (notification === 'HIDE_CANVAS') {
             this.hide();
-        }  else if (notification === 'SHOW_CANVAS') {
+        } else if (notification === 'SHOW_CANVAS') {
             this.show(1000);
         }
 
     },
 
 
-    processCANVAS: function(data) {
+    processCANVAS: function (data) {
         this.CANVAS = data;
         this.loaded = true;
     },
 
-    scheduleUpdate: function() {
+    scheduleUpdate: function () {
         setInterval(() => {
             this.getCANVAS();
         }, this.config.updateInterval);
         this.getCANVAS();
     },
 
-    getCANVAS: function() {
+    getCANVAS: function () {
         var payload = [this.config.accessKey, this.config.courses, this.config.urlbase];
         this.sendSocketNotification('GET_CANVAS', payload);
     },
 
-    socketNotificationReceived: function(notification, payload) {
+    socketNotificationReceived: function (notification, payload) {
         if (notification === "CANVAS_RESULT") {
             this.processCANVAS(payload);
 
