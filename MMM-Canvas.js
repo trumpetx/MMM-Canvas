@@ -15,6 +15,7 @@ Module.register("MMM-Canvas", {
         urlbase: "dummyurl.edu",
         assignMaxLen: 35,
         assignToDisplay: 12,
+        dateFormat: "M/D h:mm A",
     },
 
     getStyles: function () {
@@ -67,10 +68,8 @@ Module.register("MMM-Canvas", {
 
 
         Table.appendChild(Row);
-        CANVAS[1].sort((a, b) => new moment(a[1]) - new moment(b[1]));
-        var assignToDisplay = this.config.assignToDisplay + 1
-        for (var i in CANVAS[1].slice(0, assignToDisplay)) {
-
+        CANVAS.sort((smallpayload1, smallpayload2) => new moment(smallpayload1[1]) - new moment(smallpayload2[1]));
+        for (const smallpayload of CANVAS.slice(0, this.config.assignToDisplay)) {
             //// Learned this on jsfiddle. HOORAY!
             //// This dynamically creates the div/tags for each element of CANVAS.quotes
             var Row = document.createElement("tr");
@@ -78,15 +77,10 @@ Module.register("MMM-Canvas", {
             var newElement1 = document.createElement("td");
             newElement.classList.add("align-left", "small");
             newElement1.classList.add("align-right", "small");
-            if (CANVAS[1][i][0] != "") {
-                newElement.innerHTML = CANVAS[1][i][0].slice(0, this.config.assignMaxLen);
-                var m = moment(CANVAS[1][i][1]);
-                //newElement1.innerHTML = m.format("M/D h:mm A");
-                //newElement1.innerHTML = m.format("M/D h:mm A");
-                newElement1.innerHTML = CANVAS[1][i][2];
-                newElement1.style.color = this.config.colors[CANVAS[1][i][2]];
-                newElement.style.color = this.config.colors[CANVAS[1][i][2]];
-            }
+            newElement.innerHTML = smallpayload[0].slice(0, this.config.assignMaxLen);
+            newElement1.innerHTML = moment(smallpayload[1]).format(this.config.dateFormat);
+            newElement1.style.color = this.config.colors[smallpayload[2]];
+            newElement.style.color = this.config.colors[smallpayload[2]];
 
 
             Row.appendChild(newElement);
@@ -119,7 +113,7 @@ Module.register("MMM-Canvas", {
 
 
     processCANVAS: function (data) {
-        this.CANVAS = data;
+        this.CANVAS = data.flat(1);
         this.loaded = true;
     },
 

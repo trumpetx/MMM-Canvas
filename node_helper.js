@@ -6,34 +6,22 @@
  */
 const NodeHelper = require('node_helper');
 const request = require('request');
-var smallpayload = [
-    ["", "", ""],
-];
-var finalpayload = [
-    ["", ""],
-];
+let finalpayload = [ ];
 module.exports = NodeHelper.create({
-
-    start: function() {
+    start() {
         console.log("Starting node_helper for: " + this.name);
     },
 
-    getCANVAS: function(payload) {
-        var key = payload[0];
-        var courses = payload[1];
-        var urlbase = payload[2];
-        var count = 0;
-        var self = this;
+    getCANVAS(payload) {
+        const key = payload[0];
+        const courses = payload[1];
+        const urlbase = payload[2];
+        let count = 0;
         courses.forEach(runCourses);
-        var timer = setInterval(function() {
+        setInterval(() => {
             if (count == courses.length) {
-                self.sendSocketNotification('CANVAS_RESULT', finalpayload);
-                finalpayload = [
-                    ["", ""],
-                ];
-                smallpayload = [
-                    ["", ""],
-                ];
+                this.sendSocketNotification('CANVAS_RESULT', finalpayload);
+                finalpayload = [ ];
                 count = 0;
             }
         }, 400);
@@ -44,9 +32,10 @@ module.exports = NodeHelper.create({
                 url: url,
                 method: 'GET'
             }, (error, response, body) => {
+                const smallpayload = [ ];
                 if (!error && response.statusCode == 200) {
-                    var result = JSON.parse(body);
-                    for (var j in result) {
+                    const result = JSON.parse(body);
+                    for (const j in result) {
                         smallpayload.push([result[j].name, result[j].due_at, index]);
                     }
                 } else {
@@ -58,7 +47,7 @@ module.exports = NodeHelper.create({
         }
     },
 
-    socketNotificationReceived: function(notification, payload) {
+    socketNotificationReceived(notification, payload) {
         if (notification === 'GET_CANVAS') {
             this.getCANVAS(payload);
         }
