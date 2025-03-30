@@ -7,7 +7,12 @@ This is a module for `MagicMirror²` which displays upcoming assignments from th
 cd /home/pi/MagicMirror/modules
 git clone https://github.com/chase-cromwell/MMM-Canvas.git
 ```
-2.  Edit your configuration file under `config/config.js` with the following configuration.
+3. Download the `request` library:
+```
+cd MMM-Canvas
+npm install
+```
+4.  Edit your configuration file under `config/config.js` with the following configuration.
 ```
 {
   module: "MMM-Canvas",
@@ -19,14 +24,17 @@ git clone https://github.com/chase-cromwell/MMM-Canvas.git
     urlbase: "elearning.university.edu",
     assignMaxLen: 35,
     assignToDisplay: 3,
+    dateFormat: "M/D h:mm A",
+    headerText: "Upcoming Due Dates",
   }
 },
 ```
-3. Get an API key for accessKey in your Canvas account. To do this, login and go to Account -> Profile -> Settings -> Create a new access token.
-4. Input the correct Canvas url in `urlbase`. This should be the same as the url of the dashboard page of canvas. DO NOT include a trailing slash (`/`) or `https://www.`.
-5. Fill the courses array with the courses you want to check for assignments from. On each course's homepage the url will be elearning.university.edu/courses/courseId. Use courseId.
-6. (Optional) To color code the courses, put in colors in the colors array in the corresponding order with the courses array. This array accepts all CSS color values [CSS Colors](https://www.w3schools.com/colors/default.asp). I reccomend using the color names for clarity.
-7. (Optional) assignMaxLen will keep assignments from displaying too long, and assignToDisplay changes the number of upcoming assignments to show.
+5. Get an API key for accessKey in your Canvas account. To do this, login and go to Account -> Profile -> Settings -> Create a new access token.
+6. Input the correct Canvas url in `urlbase`. This should be the same as the url of the dashboard page of canvas. DO NOT include a trailing slash (`/`) or `https://www.`.
+7. Fill the courses array with the courses you want to check for assignments from. On each course's homepage the url will be elearning.university.edu/courses/courseId. Use courseId.
+8. (Optional) To color code the courses, put in colors in the colors array in the corresponding order with the courses array. This array accepts all CSS color values [CSS Colors](https://www.w3schools.com/colors/default.asp). I reccomend using the color names for clarity.
+  * If you use less colors than the number of courses, the module will cycle through them
+9. (Optional) assignMaxLen will keep assignments from displaying too long, and assignToDisplay changes the number of upcoming assignments to show.
 ### Preview
 ![Screenshot](screenshot.png)
 
