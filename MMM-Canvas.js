@@ -16,93 +16,69 @@ Module.register("MMM-Canvas", {
         assignMaxLen: 35,
         assignToDisplay: 12,
         dateFormat: "M/D h:mm A",
+        headerText: "Upcoming Due Dates",
     },
 
-    getStyles: function () {
+    getStyles() {
         return ["canvas.css"];
     },
 
-    getScripts: function () {
+    getScripts() {
         return ["moment.js"];
     },
 
-
-    start: function () {
+    start() {
         Log.info("Starting module: " + this.name);
-        this.CANVAS = {};
+        this.CANVAS = [];
         this.scheduleUpdate();
     },
 
-
-    getDom: function () {
-        var wrapper = document.createElement("div");
+    getDom() {
+        const wrapper = document.createElement("div");
         wrapper.className = "wrapper";
-        //wrapper.style.maxWidth = this.config.maxWidth;
-
         if (!this.loaded) {
             wrapper.innerHTML = this.translate("Loading Canvas . . .");
             wrapper.classList.add("bright", "light", "small");
             return wrapper;
         }
 
-        var CANVAS = this.CANVAS;
-
-        var top = document.createElement("div");
+        const top = document.createElement("div");
         top.classList.add("list-row");
 
-        // create table
-        var Table = document.createElement("table");
+        const Table = document.createElement("table");
+        const TableHeaderRow = document.createElement("tr");
+        const TableHead = document.createElement("th");
+        TableHead.classList.add("align-left", "small", "bright");
+        TableHead.innerHTML = this.config.headerText;
+        TableHeaderRow.appendChild(TableHead);
+        Table.appendChild(TableHeaderRow);
 
-        // create row and column for Currency
-        var Row = document.createElement("tr");
-        var Column = document.createElement("th");
-        Column.classList.add("align-left", "small", "bright", "Currency");
-        Column.innerHTML = "Upcoming Due Dates";
-        Row.appendChild(Column);
-
-        // create row and column for Rate
-        var Rate = document.createElement("th");
-        Rate.classList.add("align-left", "small", "bright", "Rate");
-        Rate.innerHTML = "";
-        Row.appendChild(Rate);
-
-
-        Table.appendChild(Row);
-        CANVAS.sort((smallpayload1, smallpayload2) => new moment(smallpayload1[1]) - new moment(smallpayload2[1]));
-        for (const smallpayload of CANVAS.slice(0, this.config.assignToDisplay)) {
-            //// Learned this on jsfiddle. HOORAY!
-            //// This dynamically creates the div/tags for each element of CANVAS.quotes
-            var Row = document.createElement("tr");
-            var newElement = document.createElement("td");
-            var newElement1 = document.createElement("td");
+        for (const assignment of this.CANVAS) {
+            const textColor = this.config.colors[assignment.index % this.config.colors.length];
+            const Row = document.createElement("tr");
+            const newElement = document.createElement("td");
+            const newElement1 = document.createElement("td");
             newElement.classList.add("align-left", "small");
             newElement1.classList.add("align-right", "small");
-            newElement.innerHTML = smallpayload[0].slice(0, this.config.assignMaxLen);
-            newElement1.innerHTML = moment(smallpayload[1]).format(this.config.dateFormat);
-            newElement1.style.color = this.config.colors[smallpayload[2]];
-            newElement.style.color = this.config.colors[smallpayload[2]];
-
-
+            newElement.innerHTML = assignment.name.slice(0, this.config.assignMaxLen);
+            newElement1.innerHTML = new moment(assignment.due_at).format(this.config.dateFormat);
+            newElement1.style.color = textColor;
+            newElement.style.color = textColor;
             Row.appendChild(newElement);
             Row.appendChild(newElement1);
             Table.appendChild(Row);
+        }
 
-        } // <-- closes key/pair loop
         wrapper.appendChild(Table);
-        var timestamp = document.createElement("div");
+        const timestamp = document.createElement("div");
         timestamp.classList.add("small", "bright", "timestamp");
-        timestamp.innerHTML = "Last Checked " + moment().format('h:mm a') + " today";
+        timestamp.innerHTML = "Last Checked at " + new moment().format('h:mm a');
         timestamp.style.fontSize = "x-small";
         wrapper.appendChild(timestamp);
         return wrapper;
-    }, // closes getDom
+    },
 
-
-
-
-    /////  Add this function to the modules you want to control with voice //////
-
-    notificationReceived: function (notification, payload) {
+    notificationReceived(notification, payload) {
         if (notification === 'HIDE_CANVAS') {
             this.hide();
         } else if (notification === 'SHOW_CANVAS') {
@@ -111,28 +87,29 @@ Module.register("MMM-Canvas", {
 
     },
 
-
-    processCANVAS: function (data) {
-        this.CANVAS = data.flat(1);
+    processCANVAS(data) {
+        data = data.flat(1);
+        data.sort((result1, result2) => new moment(result1.due_at) - new moment(result2.due_at));
+        this.CANVAS = data.slice(0, this.config.assignToDisplay);
         this.loaded = true;
     },
 
-    scheduleUpdate: function () {
-        setInterval(() => {
-            this.getCANVAS();
-        }, this.config.updateInterval);
+    scheduleUpdate() {
         this.getCANVAS();
+        setInterval(() => this.getCANVAS(), this.config.updateInterval);
     },
 
-    getCANVAS: function () {
-        var payload = [this.config.accessKey, this.config.courses, this.config.urlbase];
-        this.sendSocketNotification('GET_CANVAS', payload);
+    getCANVAS() {
+        this.sendSocketNotification('GET_CANVAS', {
+            accessKey: this.config.accessKey,
+            courses: this.config.courses,
+            urlbase: this.config.urlbase,
+        });
     },
 
-    socketNotificationReceived: function (notification, payload) {
+    socketNotificationReceived(notification, payload) {
         if (notification === "CANVAS_RESULT") {
             this.processCANVAS(payload);
-
             this.updateDom();
         }
         this.updateDom();
