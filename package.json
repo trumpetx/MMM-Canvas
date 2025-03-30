@@ -1,0 +1,9 @@
+{
+    "name": "MMM-Canvas",
+    "version": "1.0.0",
+    "description": "MagicMirror module to display upcoming assignments from Canvas LMS platform",
+    "author": "Chase Cromwell",
+    "dependencies": {
+        "request": "^2.88.2"
+    }
+}
